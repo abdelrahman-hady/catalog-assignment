@@ -2,6 +2,7 @@
 
 namespace Scandiweb\Test\Setup\Patch\Data;
 
+use Exception;
 use Magento\Catalog\Api\CategoryLinkManagementInterface;
 use Magento\Catalog\Api\Data\ProductInterfaceFactory;
 use Magento\Catalog\Api\ProductRepositoryInterface;
@@ -12,7 +13,13 @@ use Magento\Catalog\Model\Product\Visibility;
 use Magento\Catalog\Model\ResourceModel\Category\CollectionFactory;
 use Magento\Eav\Setup\EavSetup;
 use Magento\Framework\App\State;
+use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Exception\InputException;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
+use Magento\Framework\Exception\StateException;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
+use Magento\Framework\Validation\ValidationException;
 use Magento\InventoryApi\Api\Data\SourceItemInterface;
 use Magento\InventoryApi\Api\Data\SourceItemInterfaceFactory;
 use Magento\InventoryApi\Api\SourceItemsSaveInterface;
@@ -122,23 +129,21 @@ class AddNewProduct implements DataPatchInterface
     /**
      * Add new product
      * @return $this|AddNewProduct
-     * @throws \Exception
+     * @throws Exception
      */
     public function apply()
     {
         $this->appState->emulateAreaCode('adminhtml', [$this, 'execute']);
-
-        return $this;
     }
 
     /**
      * @return void
-     * @throws \Magento\Framework\Exception\CouldNotSaveException
-     * @throws \Magento\Framework\Exception\InputException
-     * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Magento\Framework\Exception\NoSuchEntityException
-     * @throws \Magento\Framework\Exception\StateException
-     * @throws \Magento\Framework\Validation\ValidationException
+     * @throws CouldNotSaveException
+     * @throws InputException
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
+     * @throws StateException
+     * @throws ValidationException
      */
     public function execute(): void
     {
@@ -154,20 +159,20 @@ class AddNewProduct implements DataPatchInterface
         $attributeSetId = $this->eavSetup->getAttributeSetId(Product::ENTITY, 'Default');
         $websiteIDs = [$this->storeManager->getStore()->getWebsiteId()];
         $product->setTypeId(Type::TYPE_SIMPLE)
-                ->setAttributeSetId($attributeSetId)
-                ->setName('Polo T-shirt')
-                ->setSku('polo-t-shirt')
-                ->setPrice(9.99)
-                ->setVisibility(Visibility::VISIBILITY_BOTH)
-                ->setStatus(Status::STATUS_ENABLED)
-                ->setStockData(
-                    [
-                        'use_config_manage_stock' => 1,
-                        'is_qty_decimal' => 0,
-                        'is_in_stock' => 1,
-                        'qty' => 99
-                    ]
-                );
+            ->setAttributeSetId($attributeSetId)
+            ->setName('Polo T-shirt')
+            ->setSku('polo-t-shirt')
+            ->setPrice(9.99)
+            ->setVisibility(Visibility::VISIBILITY_BOTH)
+            ->setStatus(Status::STATUS_ENABLED)
+            ->setStockData(
+                [
+                    'use_config_manage_stock' => 1,
+                    'is_qty_decimal' => 0,
+                    'is_in_stock' => 1,
+                    'qty' => 99
+                ]
+            );
 
         // Save the product to repository
         $product = $this->productRepository->save($product);
@@ -185,8 +190,8 @@ class AddNewProduct implements DataPatchInterface
 
         // Get category ID
         $categoryIDs = $this->categoryCollectionFactory->create()
-                        ->addAttributeToFilter('name', ['eq' => 'Default Category'])
-                        ->getAllIds();
+            ->addAttributeToFilter('name', ['eq' => 'Default Category'])
+            ->getAllIds();
         // Add the product to category
         $this->categoryLink->assignProductToCategories($product->getSku(), $categoryIDs);
     }
