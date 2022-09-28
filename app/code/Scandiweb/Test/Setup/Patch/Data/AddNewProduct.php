@@ -111,27 +111,27 @@ class AddNewProduct implements DataPatchInterface
     }
 
     /**
-     * {@inheritDoc}
+     * @return array
      */
-    public function getAliases()
+    public function getAliases(): array
     {
         return [];
     }
 
     /**
-     * {@inheritDoc}
+     * @return array
      */
-    public static function getDependencies()
+    public static function getDependencies(): array
     {
         return [];
     }
 
     /**
      * Add new product
-     * @return $this|AddNewProduct
+     * @return void
      * @throws Exception
      */
-    public function apply()
+    public function apply(): void
     {
         $this->appState->emulateAreaCode('adminhtml', [$this, 'execute']);
     }
